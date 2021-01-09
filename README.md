@@ -2,7 +2,7 @@
 .usmap parser
 
 # Usages
-```
+```py
 from Usmap import Usmap
 
 with open("xyz.usmap", "rb") as f:
@@ -10,6 +10,6 @@ with open("xyz.usmap", "rb") as f:
 ```
 # Requirements
 
-* Python
+* Python 3
 * requests
 * Brotli
