@@ -2,7 +2,7 @@ import io
 from typing import List
 import brotli
 
-from BinaryReader import BinaryStream
+from Usmap.BinaryReader import BinaryStream
 from Usmap.Objects.FPropertyTag import FPropertyTag
 from Usmap.Objects.FName import FName
 

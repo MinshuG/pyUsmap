@@ -1,5 +1,5 @@
 from Usmap.Objects.FName import FName
-from BinaryReader import BinaryStream
+from Usmap.BinaryReader import BinaryStream
 from enum import IntEnum, auto
 
 
