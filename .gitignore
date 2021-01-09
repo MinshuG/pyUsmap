@@ -1,3 +1,7 @@
 *.usmap
 .idea
 *.pyc
+build
+dist
+pyUsmap.egg-info
+.vscode
