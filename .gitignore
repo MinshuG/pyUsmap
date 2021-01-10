@@ -5,3 +5,4 @@ build
 dist
 pyUsmap.egg-info
 .vscode
+*.dll
