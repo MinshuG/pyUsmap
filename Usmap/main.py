@@ -43,7 +43,6 @@ class Usmap:
             decompressedData = reader.readBytes(compressSize)
         elif method == 1:
             decompressedData = Decompress(reader.readBytes(compressSize),decompressSize)
-           # raise NotImplementedError("Oodle not implemented")
         elif method == 2:
             decompressedData = brotli.decompress(reader.readBytes(compressSize))
         else:
