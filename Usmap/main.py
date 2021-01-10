@@ -1,6 +1,7 @@
 import io
 from typing import List
 import brotli
+from Usmap.Oodle import Decompress
 
 from Usmap.BinaryReader import BinaryStream
 from Usmap.Objects.FPropertyTag import FPropertyTag
@@ -41,7 +42,8 @@ class Usmap:
         if method == 0:
             decompressedData = reader.readBytes(compressSize)
         elif method == 1:
-            raise NotImplementedError("Oodle not implemented")
+            decompressedData = Decompress(reader.readBytes(compressSize),decompressSize)
+           # raise NotImplementedError("Oodle not implemented")
         elif method == 2:
             decompressedData = brotli.decompress(reader.readBytes(compressSize))
         else:
@@ -81,15 +83,14 @@ class Usmap:
             struct.PropertyCount = reader.readUInt16()
 
             serializablePropertyCount = reader.readUInt16()
-            props = []
+            props = {}
             for _ in range(serializablePropertyCount):
                 prop: StructProps = StructProps()
                 prop.SchemaIndex = reader.readUInt16()
                 prop.ArraySize = reader.readByteToInt()
                 prop.Name = reader.readFName(self.NameMap).string
                 prop.data = FPropertyTag(reader, self)
-
-                props.append(prop)
+                props[prop.SchemaIndex] = prop
 
             struct.props = props
             self.Mappings[struct.Name] = struct
