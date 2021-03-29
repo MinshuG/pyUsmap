@@ -13,7 +13,11 @@ class FPropertyTag:
         NameMap = usmap.NameMap
 
         Type = reader.readByteToInt()
-        self.Type = EUsmapPropertyType(Type)
+        try:
+            self.Type = EUsmapPropertyType(Type).name
+        except:
+            print(f"USMAP Reader: Invalid PropertyType Value {Type}")
+            self.Type = Type
 
         if Type == EUsmapPropertyType.StructProperty.value:
             self.StructName = reader.readFName(NameMap)

@@ -1,13 +1,24 @@
-from io import BufferedReader
+from io import BufferedReader, BytesIO
 from struct import *
 import sys
 import logging
+import os
+from typing import Union
+
 from Usmap.Objects.FName import FName
 
 
 class BinaryStream:
-    def __init__(self, base_stream: BufferedReader):  # not necessarily
-        self.base_stream = base_stream
+    def __init__(self, fp: Union[BufferedReader, BytesIO, str, bytes], size: int = -1):
+        if isinstance(fp, str):
+            self.base_stream = open(fp, "rb")
+            self.size = os.path.getsize(fp)
+        elif isinstance(fp, bytes):
+            self.base_stream = BytesIO(fp)
+            self.size = len(fp)
+        else:
+            self.base_stream = fp
+            self.size = size
 
     def seek(self, offset, SEEK_SET=1):
         self.base_stream.seek(offset, SEEK_SET)
@@ -102,7 +113,7 @@ class BinaryStream:
             return FName(NameMap[NameIndex], NameIndex, 0)
 
         logging.debug(f"Bad Name Index: {NameIndex}/{len(NameMap)} - Loader Position: {self.base_stream.tell()}")
-        return FName
+        return FName("None", 0, 0)
 
     def writeBytes(self, value):
         self.base_stream.write(value)
