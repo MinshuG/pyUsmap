@@ -1,13 +1,14 @@
 from Usmap.Objects.FName import FName
 from Usmap.BinaryReader import BinaryStream
 from enum import IntEnum, auto
+from dataclasses import dataclass
 
-
+@dataclass
 class FPropertyTag:
-    StructName: FName
-    ValueType = None  # self
-    EnumName: FName
-    InnerType = None  # self
+    StructName: FName = None
+    ValueType = 'FPropertyTag'  # self
+    EnumName: FName = None
+    InnerType = 'FPropertyTag'  # self
 
     def __init__(self, reader: BinaryStream, usmap) -> None:
         NameMap = usmap.NameMap
@@ -19,24 +20,41 @@ class FPropertyTag:
             print(f"USMAP Reader: Invalid PropertyType Value {Type}")
             self.Type = Type
 
-        if Type == EUsmapPropertyType.StructProperty.value:
+        if Type == EUsmapPropertyType.StructProperty:
             self.StructName = reader.readFName(NameMap)
 
-        elif Type == EUsmapPropertyType.EnumProperty.value:
+        elif Type == EUsmapPropertyType.EnumProperty:
             self.InnerType = FPropertyTag(reader, usmap)
             self.EnumName = reader.readFName(NameMap)
 
-        elif Type == EUsmapPropertyType.ArrayProperty.value:
+        elif Type == EUsmapPropertyType.ArrayProperty:
             self.InnerType = FPropertyTag(reader, usmap)
 
-        elif Type == EUsmapPropertyType.SetProperty.value:  # same as Array
+        elif Type == EUsmapPropertyType.SetProperty:  # same as Array
             self.InnerType = FPropertyTag(reader, usmap)
 
-        elif Type == EUsmapPropertyType.MapProperty.value:
+        elif Type == EUsmapPropertyType.MapProperty:
             self.InnerType = FPropertyTag(reader, usmap)
             self.ValueType = FPropertyTag(reader, usmap)
 
+    def GetValue(self):
+        Type = self.Type
+        result = {"Type": self.Type}
+        
+        if Type == EUsmapPropertyType.StructProperty:
+            result.update(StructName=self.StructName)
+        elif Type == EUsmapPropertyType.EnumProperty:
+            result.update(InnerType = self.InnerType.GetValue(), EnumName=self.EnumName.string)
+        elif Type == EUsmapPropertyType.ArrayProperty:
+            result.update(InnerType=self.InnerType.GetValue())
+        elif Type == EUsmapPropertyType.SetProperty:  # same as Array
+            result.update(InnerType=self.InnerType.GetValue())
+        elif Type == EUsmapPropertyType.MapProperty:
+            result.update(InnerType=self.InnerType.GetValue(), ValueType=self.ValueType.GetValue())
+        return result
 
+
+@dataclass
 class EUsmapPropertyType(IntEnum):
     ByteProperty = 0
     BoolProperty = auto()

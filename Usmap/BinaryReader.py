@@ -3,10 +3,11 @@ from struct import *
 import sys
 import logging
 import os
-from typing import Union
+from typing import Tuple, TypeVar, Union
 
 from Usmap.Objects.FName import FName
 
+T = TypeVar("T")
 
 class BinaryStream:
     def __init__(self, fp: Union[BufferedReader, BytesIO, str, bytes], size: int = -1):
@@ -98,11 +99,9 @@ class BinaryStream:
         else:
             return self.readBytes(length).decode("utf-8")
 
-    def readTArray(self, Gatter):
-        SerializeNum = self.readInt32()
-        A = []
-        for _ in range(SerializeNum):
-            A.append(Gatter())
+    def readTArray(self, func: T) -> Tuple[T]:
+        length = self.readInt32()
+        A = tuple(func() for _ in range(length))
         return A
 
     def readFName(self, NameMap):
@@ -110,7 +109,7 @@ class BinaryStream:
         # Number = self.readByteToInt()
 
         if 0 <= NameIndex < len(NameMap):
-            return FName(NameMap[NameIndex], NameIndex, 0)
+            return NameMap[NameIndex] # FName(NameMap[NameIndex], NameIndex, 0)
 
         logging.debug(f"Bad Name Index: {NameIndex}/{len(NameMap)} - Loader Position: {self.base_stream.tell()}")
         return FName("None", 0, 0)

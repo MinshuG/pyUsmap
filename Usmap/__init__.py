@@ -1,3 +1,3 @@
-from Usmap.main import Usmap
+from Usmap.main import Usmap, Struct, StructProps
 
-__version__ = "1.1.0"
+__version__ = "1.1.1"

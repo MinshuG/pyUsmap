@@ -1,21 +1,32 @@
 import io
-from typing import List
-import brotli
-from Usmap.Oodle import Decompress
+from re import S
+from typing import Dict, List, Tuple
+from enum import IntEnum, auto
+from dataclasses import dataclass
+import inspect
 
+import brotli
+
+from Usmap.Oodle import Decompress
 from Usmap.BinaryReader import BinaryStream
 from Usmap.Objects.FPropertyTag import FPropertyTag
-from Usmap.Objects.FName import FName
+
+
+class Version(IntEnum):
+    Initial = 0
+
+    Latest_Plus_One = auto()
+    Latest = Latest_Plus_One - 1
 
 
 class Usmap:
     MAGIC = 0x30C4
-    NameMap: List[str]
+    NameMap: Tuple[str]
     Enums: dict
-    Mappings: dict
+    Mappings: Dict[str, 'Struct']
 
-    def __init__(self, IO) -> None:
-        self.reader = BinaryStream(IO)
+    def __init__(self, fp) -> None:
+        self.reader = BinaryStream(fp)
         self.Mappings = {}
         self.Enums = {}
 
@@ -26,10 +37,10 @@ class Usmap:
         if magic != self.MAGIC:
             raise Exception("invalid magic")
 
-        version = reader.readByteToInt()
+        version = Version(reader.readByteToInt())
 
-        if version != 0:  # Initial
-            raise Exception(".usmap file has invalid version $version")
+        if version != Version.Latest:  # Initial
+            raise Exception(f".usmap file has invalid version {version}")
 
         method = reader.readByteToInt()
         compressSize = reader.readInt32()
@@ -67,49 +78,74 @@ class Usmap:
             Number = reader.readByteToInt()
             Values = []
             for _ in range(Number):
-                Name = reader.readFName(self.NameMap).string  # FName
+                Name = reader.readFName(self.NameMap)
                 Values.append(Name)
 
-            self.Enums[enumName.string] = []
-            self.Enums[enumName.string] = Values
+            self.Enums[enumName] = ()
+            self.Enums[enumName] = tuple(Values)
 
         # Schemas
         size = reader.readUInt32()
         for _ in range(size):
-            struct: Struct = Struct()
-            struct.Name = reader.readFName(self.NameMap).string
-            struct.SuperIndex = reader.readUInt32()
-            struct.PropertyCount = reader.readUInt16()
+            structName = reader.readFName(self.NameMap)
+            SuperIndex = reader.readUInt32()
+            PropertyCount = reader.readUInt16()
 
             serializablePropertyCount = reader.readUInt16()
             props = {}
             for _ in range(serializablePropertyCount):
-                prop: StructProps = StructProps()
-                prop.SchemaIndex = reader.readUInt16()
-                prop.ArraySize = reader.readByteToInt()
-                prop.Name = reader.readFName(self.NameMap).string
-                prop.data = FPropertyTag(reader, self)
-                props[prop.SchemaIndex] = prop
+                SchemaIndex = reader.readUInt16()
+                ArraySize = reader.readByteToInt()
+                Name = reader.readFName(self.NameMap)
+                data = FPropertyTag(reader, self)
 
-            struct.props = props
+                prop: StructProps = StructProps(SchemaIndex,ArraySize, Name, data)
+                props[SchemaIndex] = prop
+
+            struct: Struct = Struct(structName, SuperIndex, PropertyCount, props=props)
             self.Mappings[struct.Name] = struct
 
+    def GetValue(self):
+        Dict = {}
+        Dict["Enums"] = self.Enums
+        Dict["Mappings"] = {}
+        for k,v in self.Mappings.items():
+            Dict["Mappings"][k] = v.GetValue()
+        return Dict
 
+@dataclass
 class StructProps:
     SchemaIndex: int
     ArraySize: int
-    Name: FName
+    Name: str
     data: FPropertyTag
 
-    def __init__(self):
-        pass
+    def GetValue(self):
+        return {
+            "SchemaIndex": self.SchemaIndex,
+            "ArraySize": self.ArraySize,
+            "Name": self.Name,
+            **self.data.GetValue()
+        }
 
-
+@dataclass
 class Struct:
-    Name: FName
+    Name: str
     SuperIndex: int
     PropertyCount: int
-    props: StructProps
+    props: Dict[int, StructProps]
 
-    def __init__(self):
-        pass
+    def GetValue(self):
+        props = {}
+        for k,v in self.props.items():
+            props[k] = v.GetValue()
+
+        return {
+            "Name": self.Name,
+            "SuperIndex": self.SuperIndex,
+            "PropertyCount": self.PropertyCount,
+            "props": props
+        }
+
+    def getprop(self, index: int):
+        return self.props.get(index)
