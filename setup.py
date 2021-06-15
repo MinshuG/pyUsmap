@@ -1,6 +1,6 @@
 from setuptools import setup
 import pathlib
-
+from Usmap import __version__
 
 HERE = pathlib.Path(__file__).parent
 
@@ -10,7 +10,7 @@ README = (HERE / "README.md").read_text()
 
 setup(
     name="pyUsmap",
-    version="1.1.0",
+    version=__version__,
     description=".usmap file reader",
     long_description=README,
     long_description_content_type="text/markdown",
