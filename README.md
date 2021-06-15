@@ -1,7 +1,7 @@
 # pyUsmap
 .usmap reader
 
-[![pypi](https://img.shields.io/pypi/v/valorant-api.svg)](https://pypi.python.org/pypi/valorant-api/)
+[![pypi](https://img.shields.io/pypi/v/pyusmap.svg)](https://pypi.python.org/pypi/valorant-api/)
 [![Downloads](https://pepy.tech/badge/pyusmap)](https://pepy.tech/project/pyusmap)
 
 # Installation
