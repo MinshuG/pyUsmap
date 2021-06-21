@@ -88,4 +88,3 @@ def OodleLZ_Decompress(
     else:
         exit(1)
 
-load_lib()
