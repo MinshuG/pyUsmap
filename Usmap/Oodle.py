@@ -86,5 +86,4 @@ def OodleLZ_Decompress(
         )
         return data
     else:
-        exit(1)
-
+        raise Exception("Failed to load Oodle lib")
