@@ -7,7 +7,7 @@ import inspect
 
 import brotli
 
-from Usmap.Oodle import Decompress
+from .Oodle import Decompress
 from Usmap.BinaryReader import BinaryStream
 from Usmap.Objects.FPropertyTag import FPropertyTag
 

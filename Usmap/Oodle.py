@@ -5,7 +5,7 @@ import urllib.request
 import io
 
 def load_lib() -> bool:
-    OODLE_DLL_NAME = "oo2core_8_win64.dll"
+    OODLE_DLL_NAME = "oo2core_9_win64.dll"
     libname = os.path.abspath(
             os.path.join(os.getcwd(), OODLE_DLL_NAME)
         )
