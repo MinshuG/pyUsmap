@@ -17,7 +17,7 @@ class FPropertyTag:
         try:
             self.Type = EUsmapPropertyType(Type).name
         except:
-            print(f"USMAP Reader: Invalid PropertyType Value {Type}")
+            # print(f"USMAP Reader: Unknown PropertyType Value {Type}")
             self.Type = Type
 
         if Type == EUsmapPropertyType.StructProperty:
@@ -27,15 +27,15 @@ class FPropertyTag:
             self.InnerType = FPropertyTag(reader, usmap)
             self.EnumName = reader.readFName(NameMap)
 
-        elif Type == EUsmapPropertyType.ArrayProperty:
-            self.InnerType = FPropertyTag(reader, usmap)
-
-        elif Type == EUsmapPropertyType.SetProperty:  # same as Array
+        elif Type in (EUsmapPropertyType.ArrayProperty,  EUsmapPropertyType.SetProperty, EUsmapPropertyType.OptionalProperty):
             self.InnerType = FPropertyTag(reader, usmap)
 
         elif Type == EUsmapPropertyType.MapProperty:
             self.InnerType = FPropertyTag(reader, usmap)
             self.ValueType = FPropertyTag(reader, usmap)
+        else:
+            print(f"USMAP Reader: Unknown PropertyType {Type}")
+
 
     def GetValue(self):
         result = {}
@@ -97,3 +97,5 @@ class EUsmapPropertyType(IntEnum):
     SetProperty = auto()
     EnumProperty = auto()
     FieldPathProperty = auto()
+    OptionalProperty = auto()
+

@@ -1,11 +1,7 @@
 import io
-from re import S
-from typing import Dict, List, Tuple
+from typing import Dict, Tuple
 from enum import IntEnum, auto
 from dataclasses import dataclass
-import inspect
-
-import brotli
 
 from .Oodle import Decompress
 from Usmap.BinaryReader import BinaryStream
@@ -55,6 +51,7 @@ class Usmap:
         elif method == 1:
             decompressedData = Decompress(reader.readBytes(compressSize),decompressSize)
         elif method == 2:
+            import brotli
             decompressedData = brotli.decompress(reader.readBytes(compressSize))
         else:
             raise Exception("Unknown compression method")
